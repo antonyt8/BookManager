@@ -1,29 +1,99 @@
 <%- include('partials/header') %>
 <%- include('partials/nav') %>
 
-<h2>Lista de Livros</h2>
-<table border="1">
-  <tr>
-    <th>Título</th>
-    <th>Autor</th>
-    <th>Ano</th>
-    <th>Gênero</th>
-    <th>Ações</th>
-  </tr>
-  <% livros.forEach(livro => { %>
-    <tr>
-      <td><%= livro.titulo %></td>
-      <td><%= livro.autor %></td>
-      <td><%= livro.ano %></td>
-      <td><%= livro.genero %></td>
-      <td>
-        <a href="/livros/editar/<%= livro.id %>">Editar</a>
-        <form action="/livros/deletar/<%= livro.id %>" method="POST" style="display:inline;">
-          <button type="submit">Excluir</button>
-        </form>
-      </td>
-    </tr>
-  <% }) %>
-</table>
+<div class="container bg-white p-4 rounded shadow-sm mt-4">
+  <% if (success) { %>
+    <p class="alert alert-success"><%= success %></p>
+  <% } %>
+  <% if (error) { %>
+    <p class="alert alert-danger"><%= error %></p>
+  <% } %>
+
+  <h2>Lista de Livros</h2>
+
+  <form class="row g-3 mb-3" method="GET" action="/livros">
+    <div class="col-auto">
+      <input type="text" name="busca" class="form-control" placeholder="Buscar por título" value="<%= typeof busca !== 'undefined' ? busca : '' %>">
+    </div>
+    <div class="col-auto">
+      <button type="submit" class="btn btn-outline-primary mb-3">Buscar</button>
+    </div>
+  </form>
+
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th>Título</th>
+        <th>Autor</th>
+        <th>Ano</th>
+        <th>Gênero</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% livros.forEach(livro => { %>
+        <tr>
+          <td><%= livro.titulo %></td>
+          <td><%= livro.autor %></td>
+          <td><%= livro.ano %></td>
+          <td><%= livro.genero %></td>
+          <td>
+            <a href="/livros/editar/<%= livro.id %>" class="btn btn-sm btn-primary">Editar</a>
+            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#modalExcluir" data-id="<%= livro.id %>">Excluir</button>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+
+  <% if (totalPages > 1) { %>
+    <nav aria-label="Navegação de página">
+      <ul class="pagination justify-content-center">
+        <li class="page-item <%= page === 1 ? 'disabled' : '' %>">
+          <a class="page-link" href="?busca=<%= busca %>&page=<%= page - 1 %>">Anterior</a>
+        </li>
+        <% for (let i = 1; i <= totalPages; i++) { %>
+          <li class="page-item <%= page === i ? 'active' : '' %>">
+            <a class="page-link" href="?busca=<%= busca %>&page=<%= i %>"><%= i %></a>
+          </li>
+        <% } %>
+        <li class="page-item <%= page === totalPages ? 'disabled' : '' %>">
+          <a class="page-link" href="?busca=<%= busca %>&page=<%= page + 1 %>">Próxima</a>
+        </li>
+      </ul>
+    </nav>
+  <% } %>
+
+  <!-- Modal de confirmação de exclusão -->
+  <div class="modal fade" id="modalExcluir" tabindex="-1" aria-labelledby="modalExcluirLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalExcluirLabel">Confirmar exclusão</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+        </div>
+        <div class="modal-body">
+          Tem certeza que deseja excluir este livro?
+        </div>
+        <div class="modal-footer">
+          <form id="formExcluir" method="POST">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-danger">Excluir</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var modalExcluir = document.getElementById('modalExcluir');
+    modalExcluir.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget;
+      var id = button.getAttribute('data-id');
+      var form = document.getElementById('formExcluir');
+      form.action = '/livros/deletar/' + id;
+    });
+  </script>
+</div>
 
 <%- include('partials/footer') %> 

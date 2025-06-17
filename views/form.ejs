@@ -3,12 +3,36 @@
 
 <h2><%= livro.id ? 'Editar Livro' : 'Adicionar Novo Livro' %></h2>
 
-<form action="<%= acao %>" method="POST">
-  <label>Título: <input type="text" name="titulo" value="<%= livro.titulo || '' %>" required></label><br>
-  <label>Autor: <input type="text" name="autor" value="<%= livro.autor || '' %>" required></label><br>
-  <label>Ano de Publicação: <input type="number" name="ano" value="<%= livro.ano || '' %>" required></label><br>
-  <label>Gênero: <input type="text" name="genero" value="<%= livro.genero || '' %>" required></label><br>
-  <button type="submit">Salvar</button>
+<% if (typeof erros !== 'undefined' && erros.length > 0) { %>
+  <ul class="alert alert-danger">
+    <% erros.forEach(e => { %>
+      <li><%= e.msg %></li>
+    <% }) %>
+  </ul>
+<% } %>
+
+<form action="<%= acao %>" method="POST" class="bg-white p-4 rounded shadow-sm" style="max-width:600px;">
+  <div class="mb-3">
+    <label class="form-label">Título:
+      <input type="text" name="titulo" value="<%= livro.titulo || '' %>" required class="form-control" placeholder="Ex: Dom Casmurro" autocomplete="off">
+    </label>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Autor:
+      <input type="text" name="autor" value="<%= livro.autor || '' %>" required class="form-control" placeholder="Ex: Machado de Assis" autocomplete="off">
+    </label>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Ano de Publicação:
+      <input type="number" name="ano" value="<%= livro.ano || '' %>" required class="form-control" placeholder="Ex: 1899" autocomplete="off">
+    </label>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Gênero:
+      <input type="text" name="genero" value="<%= livro.genero || '' %>" required class="form-control" placeholder="Ex: Romance" autocomplete="off">
+    </label>
+  </div>
+  <button type="submit" class="btn btn-success">Salvar</button>
 </form>
 
 <%- include('partials/footer') %> 

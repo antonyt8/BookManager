@@ -137,4 +137,9 @@ footer {
   form {
     padding: 15px;
   }
+}
+
+/* Ajustes para formulário e tabelas se necessário */
+form.bg-white {
+  margin: 0 auto;
 } 
