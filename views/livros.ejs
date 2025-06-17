@@ -1,0 +1,29 @@
+<%- include('partials/header') %>
+<%- include('partials/nav') %>
+
+<h2>Lista de Livros</h2>
+<table border="1">
+  <tr>
+    <th>Título</th>
+    <th>Autor</th>
+    <th>Ano</th>
+    <th>Gênero</th>
+    <th>Ações</th>
+  </tr>
+  <% livros.forEach(livro => { %>
+    <tr>
+      <td><%= livro.titulo %></td>
+      <td><%= livro.autor %></td>
+      <td><%= livro.ano %></td>
+      <td><%= livro.genero %></td>
+      <td>
+        <a href="/livros/editar/<%= livro.id %>">Editar</a>
+        <form action="/livros/deletar/<%= livro.id %>" method="POST" style="display:inline;">
+          <button type="submit">Excluir</button>
+        </form>
+      </td>
+    </tr>
+  <% }) %>
+</table>
+
+<%- include('partials/footer') %> 
