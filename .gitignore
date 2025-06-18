@@ -1,1 +1,33 @@
-node_modules
+# Dependências
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Banco de dados
+# *.sqlite
+# *.sqlite3
+# *.db
+
+# Arquivos temporários
+tmp/
+temp/
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build
+dist/
+build/
+
+# Coverage
+coverage/
