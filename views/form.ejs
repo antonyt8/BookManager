@@ -56,10 +56,75 @@
           <!-- Gênero -->
           <div class="col-md-6">
             <label for="genero" class="form-label">
-              <i class="fas fa-tag"></i> Gênero
+              <i class="fas fa-tag"></i> Gênero(s)
             </label>
-            <input type="text" class="form-control" id="genero" name="genero" 
-                   value="<%= livro ? livro.genero : '' %>">
+            <div class="input-group">
+              <select class="form-select" id="generoSelect">
+                <option value="">Selecione um gênero...</option>
+                <option value="Ficção">Ficção</option>
+                <option value="Romance">Romance</option>
+                <option value="Mistério">Mistério</option>
+                <option value="Suspense">Suspense</option>
+                <option value="Fantasia">Fantasia</option>
+                <option value="Ficção Científica">Ficção Científica</option>
+                <option value="Terror">Terror</option>
+                <option value="Aventura">Aventura</option>
+                <option value="História">História</option>
+                <option value="Biografia">Biografia</option>
+                <option value="Autobiografia">Autobiografia</option>
+                <option value="Memórias">Memórias</option>
+                <option value="Filosofia">Filosofia</option>
+                <option value="Psicologia">Psicologia</option>
+                <option value="Sociologia">Sociologia</option>
+                <option value="Política">Política</option>
+                <option value="Economia">Economia</option>
+                <option value="Negócios">Negócios</option>
+                <option value="Autoajuda">Autoajuda</option>
+                <option value="Desenvolvimento Pessoal">Desenvolvimento Pessoal</option>
+                <option value="Religião">Religião</option>
+                <option value="Espiritualidade">Espiritualidade</option>
+                <option value="Poesia">Poesia</option>
+                <option value="Teatro">Teatro</option>
+                <option value="Crônicas">Crônicas</option>
+                <option value="Contos">Contos</option>
+                <option value="Infantil">Infantil</option>
+                <option value="Juvenil">Juvenil</option>
+                <option value="Educação">Educação</option>
+                <option value="Tecnologia">Tecnologia</option>
+                <option value="Ciência">Ciência</option>
+                <option value="Medicina">Medicina</option>
+                <option value="Saúde">Saúde</option>
+                <option value="Esportes">Esportes</option>
+                <option value="Viagem">Viagem</option>
+                <option value="Culinária">Culinária</option>
+                <option value="Arte">Arte</option>
+                <option value="Música">Música</option>
+                <option value="Cinema">Cinema</option>
+                <option value="Fotografia">Fotografia</option>
+                <option value="Design">Design</option>
+                <option value="Arquitetura">Arquitetura</option>
+                <option value="Moda">Moda</option>
+                <option value="Beleza">Beleza</option>
+                <option value="Jardinagem">Jardinagem</option>
+                <option value="Bricolagem">Bricolagem</option>
+                <option value="Outro">Outro</option>
+              </select>
+              <button type="button" class="btn btn-outline-primary" onclick="adicionarGenero()">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+            <div id="generosSelecionados" class="mt-2">
+              <% if (livro && livro.genero) { %>
+                <% livro.genero.split(',').forEach(function(gen) { %>
+                  <span class="badge bg-primary me-1 mb-1">
+                    <%= gen.trim() %>
+                    <button type="button" class="btn-close btn-close-white ms-1" onclick="removerGenero(this)" style="font-size: 0.5em;"></button>
+                  </span>
+                <% }); %>
+              <% } %>
+            </div>
+            <input type="hidden" id="genero" name="genero" value="<%= livro ? livro.genero : '' %>">
+            <small class="form-text text-muted">Selecione um ou mais gêneros. Clique no X para remover.</small>
           </div>
 
           <!-- Avaliação -->
@@ -198,5 +263,72 @@
     </div>
   </div>
 </div>
+
+<script>
+// Função para adicionar gênero
+function adicionarGenero() {
+  const select = document.getElementById('generoSelect');
+  const genero = select.value.trim();
+  
+  if (!genero) {
+    alert('Por favor, selecione um gênero.');
+    return;
+  }
+  
+  // Verificar se já existe
+  const generosExistentes = document.querySelectorAll('#generosSelecionados .badge');
+  for (let badge of generosExistentes) {
+    if (badge.textContent.trim().replace('×', '').trim() === genero) {
+      alert('Este gênero já foi adicionado.');
+      return;
+    }
+  }
+  
+  // Criar badge
+  const badge = document.createElement('span');
+  badge.className = 'badge bg-primary me-1 mb-1';
+  badge.innerHTML = `
+    ${genero}
+    <button type="button" class="btn-close btn-close-white ms-1" onclick="removerGenero(this)" style="font-size: 0.5em;"></button>
+  `;
+  
+  document.getElementById('generosSelecionados').appendChild(badge);
+  
+  // Limpar select
+  select.value = '';
+  
+  // Atualizar campo hidden
+  atualizarCampoGenero();
+}
+
+// Função para remover gênero
+function removerGenero(button) {
+  button.parentElement.remove();
+  atualizarCampoGenero();
+}
+
+// Função para atualizar o campo hidden
+function atualizarCampoGenero() {
+  const badges = document.querySelectorAll('#generosSelecionados .badge');
+  const generos = Array.from(badges).map(badge => 
+    badge.textContent.trim().replace('×', '').trim()
+  );
+  
+  document.getElementById('genero').value = generos.join(', ');
+}
+
+// Permitir adicionar gênero com Enter
+document.getElementById('generoSelect').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    adicionarGenero();
+  }
+});
+
+// Inicializar campo hidden se houver gêneros existentes
+document.addEventListener('DOMContentLoaded', function() {
+  atualizarCampoGenero();
+});
+</script>
 
 <%- include('partials/footer') %> 
