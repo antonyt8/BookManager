@@ -1,10 +1,111 @@
 <%- include('partials/header') %>
 <%- include('partials/nav') %>
 
-<div class="container bg-white p-5 rounded shadow-sm mt-4">
-  <h1 class="mb-3">Bem-vindo ao Gerenciador de Livros</h1>
-  <p class="lead">Um sistema simples e eficiente para gerenciar sua biblioteca pessoal.</p>
-  <a href="/livros" class="btn btn-primary mt-3">Acessar lista de livros</a>
+<div class="container fade-in-up">
+  <!-- Hero Section -->
+  <div class="card glass mb-4">
+    <div class="card-body text-center py-5">
+      <div class="mb-4">
+        <i class="fas fa-book-open fa-4x text-gradient mb-3"></i>
+        <h1 class="display-4 fw-bold text-gradient mb-3">BookManager</h1>
+        <p class="lead text-muted fs-5">Transforme sua biblioteca pessoal em uma experiência digital moderna</p>
+      </div>
+      
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="/livros" class="btn btn-primary btn-lg">
+              <i class="fas fa-books"></i> Ver Biblioteca
+            </a>
+            <a href="/livros/novo" class="btn btn-outline-primary btn-lg">
+              <i class="fas fa-plus"></i> Adicionar Livro
+            </a>
+            <a href="/dashboard" class="btn btn-outline-primary btn-lg">
+              <i class="fas fa-chart-bar"></i> Dashboard
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features Section -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-4">
+      <div class="card card-hover h-100">
+        <div class="card-body text-center">
+          <div class="mb-3">
+            <i class="fas fa-search fa-3x text-gradient"></i>
+          </div>
+          <h5 class="card-title fw-bold">Busca Inteligente</h5>
+          <p class="card-text text-muted">Encontre seus livros rapidamente com busca por título, autor ou gênero</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4">
+      <div class="card card-hover h-100">
+        <div class="card-body text-center">
+          <div class="mb-3">
+            <i class="fas fa-chart-pie fa-3x text-gradient"></i>
+          </div>
+          <h5 class="card-title fw-bold">Estatísticas</h5>
+          <p class="card-text text-muted">Acompanhe seu progresso de leitura com gráficos e relatórios</p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4">
+      <div class="card card-hover h-100">
+        <div class="card-body text-center">
+          <div class="mb-3">
+            <i class="fas fa-mobile-alt fa-3x text-gradient"></i>
+          </div>
+          <h5 class="card-title fw-bold">Responsivo</h5>
+          <p class="card-text text-muted">Acesse sua biblioteca de qualquer dispositivo, a qualquer hora</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Stats -->
+  <div class="card glass">
+    <div class="card-header">
+      <h5 class="mb-0"><i class="fas fa-tachometer-alt"></i> Visão Geral</h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <div class="stats-card primary">
+            <i class="fas fa-books"></i>
+            <h3>0</h3>
+            <p>Total de Livros</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stats-card success">
+            <i class="fas fa-check-circle"></i>
+            <h3>0</h3>
+            <p>Livros Lidos</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stats-card warning">
+            <i class="fas fa-book-reader"></i>
+            <h3>0</h3>
+            <p>Lendo Atualmente</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stats-card info">
+            <i class="fas fa-bookmark"></i>
+            <h3>0</h3>
+            <p>Para Ler</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <%- include('partials/footer') %> 

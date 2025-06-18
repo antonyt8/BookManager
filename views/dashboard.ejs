@@ -1,0 +1,301 @@
+<%- include('partials/header') %>
+<%- include('partials/nav') %>
+
+<div class="container fade-in-up">
+  <!-- Header do Dashboard -->
+  <div class="card glass mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h2 class="mb-1"><i class="fas fa-chart-bar text-gradient"></i> Dashboard</h2>
+          <p class="text-muted mb-0">Visão geral da sua biblioteca pessoal</p>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="/livros" class="btn btn-outline-primary">
+            <i class="fas fa-books"></i> Ver Biblioteca
+          </a>
+          <a href="/livros/novo" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Novo Livro
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estatísticas principais -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-3">
+      <div class="stats-card primary">
+        <i class="fas fa-books"></i>
+        <h3><%= totalLivros %></h3>
+        <p>Total de Livros</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stats-card success">
+        <i class="fas fa-check-circle"></i>
+        <h3><%= livrosLidos %></h3>
+        <p>Livros Lidos</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stats-card warning">
+        <i class="fas fa-book-reader"></i>
+        <h3><%= livrosLendo %></h3>
+        <p>Lendo Atualmente</p>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stats-card info">
+        <i class="fas fa-bookmark"></i>
+        <h3><%= livrosParaLer %></h3>
+        <p>Para Ler</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráficos e análises -->
+  <div class="row g-4 mb-4">
+    <!-- Gráfico de Status -->
+    <div class="col-md-6">
+      <div class="card glass h-100">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Status de Leitura</h5>
+        </div>
+        <div class="card-body">
+          <canvas id="statusChart" width="400" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gráfico de Gêneros -->
+    <div class="col-md-6">
+      <div class="card glass h-100">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Gêneros Mais Lidos</h5>
+        </div>
+        <div class="card-body">
+          <canvas id="generoChart" width="400" height="200"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Análises detalhadas -->
+  <div class="row g-4 mb-4">
+    <!-- Melhores avaliações -->
+    <div class="col-md-6">
+      <div class="card glass h-100">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-star"></i> Melhores Avaliações</h5>
+        </div>
+        <div class="card-body">
+          <% if (melhoresAvaliacoes.length > 0) { %>
+            <div class="list-group list-group-flush">
+              <% melhoresAvaliacoes.forEach(livro => { %>
+                <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                  <div>
+                    <h6 class="mb-1"><%= livro.titulo %></h6>
+                    <small class="text-muted"><%= livro.autor %></small>
+                  </div>
+                  <div class="text-warning">
+                    <% for (let i = 0; i < livro.avaliacao; i++) { %>
+                      <i class="fas fa-star"></i>
+                    <% } %>
+                    <span class="badge bg-primary ms-2"><%= livro.avaliacao %>/5</span>
+                  </div>
+                </div>
+              <% }) %>
+            </div>
+          <% } else { %>
+            <div class="text-center py-4">
+              <i class="fas fa-star fa-3x text-muted mb-3"></i>
+              <p class="text-muted">Nenhum livro avaliado ainda</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Livros recentes -->
+    <div class="col-md-6">
+      <div class="card glass h-100">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fas fa-clock"></i> Livros Recentes</h5>
+        </div>
+        <div class="card-body">
+          <% if (livrosRecentes && livrosRecentes.length > 0) { %>
+            <div class="list-group list-group-flush">
+              <% livrosRecentes.forEach(function(livro) { %>
+                <div class="list-group-item d-flex justify-content-between align-items-center border-0 px-0">
+                  <div>
+                    <h6 class="mb-1"><%= livro.titulo %></h6>
+                    <small class="text-muted">
+                      <%= livro.autor %> • <%= livro.ano || 'N/A' %>
+                      <% if (livro.status === 'lido') { %>
+                        <span class="badge bg-success ms-2">Lido</span>
+                      <% } else if (livro.status === 'lendo') { %>
+                        <span class="badge bg-warning ms-2">Lendo</span>
+                      <% } else { %>
+                        <span class="badge bg-info ms-2">Para Ler</span>
+                      <% } %>
+                    </small>
+                  </div>
+                  <small class="text-muted">
+                    <% if (livro.created_at) { %>
+                      <%= new Date(livro.created_at).toLocaleDateString('pt-BR') %>
+                    <% } else { %>
+                      -
+                    <% } %>
+                  </small>
+                </div>
+              <% }); %>
+            </div>
+          <% } else { %>
+            <div class="text-center py-4">
+              <i class="fas fa-clock fa-3x text-muted mb-3"></i>
+              <p class="text-muted">Nenhum livro adicionado ainda</p>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estatísticas avançadas -->
+  <div class="row g-4">
+    <!-- Média de avaliação -->
+    <div class="col-md-4">
+      <div class="card glass">
+        <div class="card-body text-center">
+          <i class="fas fa-star fa-3x text-warning mb-3"></i>
+          <h3 class="text-gradient"><%= mediaAvaliacao.toFixed(1) %></h3>
+          <p class="text-muted mb-0">Média de Avaliação</p>
+          <small class="text-muted">(<%= livrosAvaliados %> livros avaliados)</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total de páginas -->
+    <div class="col-md-4">
+      <div class="card glass">
+        <div class="card-body text-center">
+          <i class="fas fa-file-alt fa-3x text-gradient mb-3"></i>
+          <h3 class="text-gradient"><%= totalPaginas.toLocaleString('pt-BR') %></h3>
+          <p class="text-muted mb-0">Total de Páginas</p>
+          <small class="text-muted">(<%= livrosComPaginas %> livros com páginas)</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gênero favorito -->
+    <div class="col-md-4">
+      <div class="card glass">
+        <div class="card-body text-center">
+          <i class="fas fa-heart fa-3x text-gradient mb-3"></i>
+          <h3 class="text-gradient"><%= generoFavorito || 'N/A' %></h3>
+          <p class="text-muted mb-0">Gênero Favorito</p>
+          <% if (generoFavorito) { %>
+            <small class="text-muted">(<%= livrosPorGenero[generoFavorito] %> livros)</small>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  // Dados para os gráficos
+  const statusData = {
+    labels: ['Lidos', 'Lendo', 'Para Ler'],
+    datasets: [{
+      data: [<%= livrosLidos || 0 %>, <%= livrosLendo || 0 %>, <%= livrosParaLer || 0 %>],
+      backgroundColor: [
+        'rgba(79, 172, 254, 0.8)',
+        'rgba(67, 233, 123, 0.8)',
+        'rgba(240, 147, 251, 0.8)'
+      ],
+      borderColor: [
+        'rgba(79, 172, 254, 1)',
+        'rgba(67, 233, 123, 1)',
+        'rgba(240, 147, 251, 1)'
+      ],
+      borderWidth: 2
+    }]
+  };
+
+  // Dados de gêneros (simplificado para evitar conflitos)
+  const generoLabels = [];
+  const generoValues = [];
+  
+  <% if (typeof livrosPorGenero !== 'undefined' && livrosPorGenero) { %>
+    <% Object.keys(livrosPorGenero).forEach(genero => { %>
+      generoLabels.push('<%= genero %>');
+      generoValues.push(<%= livrosPorGenero[genero] %>);
+    <% }); %>
+  <% } %>
+
+  const generoData = {
+    labels: generoLabels,
+    datasets: [{
+      label: 'Livros por Gênero',
+      data: generoValues,
+      backgroundColor: 'rgba(102, 126, 234, 0.8)',
+      borderColor: 'rgba(102, 126, 234, 1)',
+      borderWidth: 2,
+      borderRadius: 8
+    }]
+  };
+
+  // Configuração dos gráficos
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          usePointStyle: true,
+          padding: 20,
+          font: {
+            family: 'Inter',
+            size: 12
+          }
+        }
+      }
+    }
+  };
+
+  // Criar gráficos
+  const statusCtx = document.getElementById('statusChart').getContext('2d');
+  new Chart(statusCtx, {
+    type: 'doughnut',
+    data: statusData,
+    options: {
+      ...chartOptions,
+      cutout: '60%'
+    }
+  });
+
+  const generoCtx = document.getElementById('generoChart').getContext('2d');
+  new Chart(generoCtx, {
+    type: 'bar',
+    data: generoData,
+    options: {
+      ...chartOptions,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1
+          }
+        }
+      }
+    }
+  });
+</script>
+
+<%- include('partials/footer') %> 

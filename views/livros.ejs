@@ -1,99 +1,183 @@
 <%- include('partials/header') %>
 <%- include('partials/nav') %>
 
-<div class="container bg-white p-4 rounded shadow-sm mt-4">
-  <% if (success) { %>
-    <p class="alert alert-success"><%= success %></p>
-  <% } %>
-  <% if (error) { %>
-    <p class="alert alert-danger"><%= error %></p>
-  <% } %>
-
-  <h2>Lista de Livros</h2>
-
-  <form class="row g-3 mb-3" method="GET" action="/livros">
-    <div class="col-auto">
-      <input type="text" name="busca" class="form-control" placeholder="Buscar por título" value="<%= typeof busca !== 'undefined' ? busca : '' %>">
-    </div>
-    <div class="col-auto">
-      <button type="submit" class="btn btn-outline-primary mb-3">Buscar</button>
-    </div>
-  </form>
-
-  <table class="table table-striped table-bordered">
-    <thead>
-      <tr>
-        <th>Título</th>
-        <th>Autor</th>
-        <th>Ano</th>
-        <th>Gênero</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% livros.forEach(livro => { %>
-        <tr>
-          <td><%= livro.titulo %></td>
-          <td><%= livro.autor %></td>
-          <td><%= livro.ano %></td>
-          <td><%= livro.genero %></td>
-          <td>
-            <a href="/livros/editar/<%= livro.id %>" class="btn btn-sm btn-primary">Editar</a>
-            <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#modalExcluir" data-id="<%= livro.id %>">Excluir</button>
-          </td>
-        </tr>
-      <% }) %>
-    </tbody>
-  </table>
-
-  <% if (totalPages > 1) { %>
-    <nav aria-label="Navegação de página">
-      <ul class="pagination justify-content-center">
-        <li class="page-item <%= page === 1 ? 'disabled' : '' %>">
-          <a class="page-link" href="?busca=<%= busca %>&page=<%= page - 1 %>">Anterior</a>
-        </li>
-        <% for (let i = 1; i <= totalPages; i++) { %>
-          <li class="page-item <%= page === i ? 'active' : '' %>">
-            <a class="page-link" href="?busca=<%= busca %>&page=<%= i %>"><%= i %></a>
-          </li>
-        <% } %>
-        <li class="page-item <%= page === totalPages ? 'disabled' : '' %>">
-          <a class="page-link" href="?busca=<%= busca %>&page=<%= page + 1 %>">Próxima</a>
-        </li>
-      </ul>
-    </nav>
-  <% } %>
-
-  <!-- Modal de confirmação de exclusão -->
-  <div class="modal fade" id="modalExcluir" tabindex="-1" aria-labelledby="modalExcluirLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalExcluirLabel">Confirmar exclusão</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+<div class="container fade-in-up">
+  <!-- Header -->
+  <div class="card glass mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h2 class="mb-1">
+            <i class="fas fa-books text-gradient"></i> Biblioteca
+          </h2>
+          <p class="text-muted mb-0">Gerencie sua coleção de livros</p>
         </div>
-        <div class="modal-body">
-          Tem certeza que deseja excluir este livro?
-        </div>
-        <div class="modal-footer">
-          <form id="formExcluir" method="POST">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-            <button type="submit" class="btn btn-danger">Excluir</button>
-          </form>
-        </div>
+        <a href="/livros/novo" class="btn btn-primary">
+          <i class="fas fa-plus"></i> Novo Livro
+        </a>
       </div>
     </div>
   </div>
 
-  <script>
-    var modalExcluir = document.getElementById('modalExcluir');
-    modalExcluir.addEventListener('show.bs.modal', function (event) {
-      var button = event.relatedTarget;
-      var id = button.getAttribute('data-id');
-      var form = document.getElementById('formExcluir');
-      form.action = '/livros/deletar/' + id;
-    });
-  </script>
+  <!-- Filtros -->
+  <div class="card glass mb-4">
+    <div class="card-body">
+      <form method="GET" action="/livros" class="row g-3">
+        <div class="col-md-4">
+          <input type="text" class="form-control" name="busca" 
+                 placeholder="Buscar por título, autor ou gênero..." 
+                 value="<%= busca %>">
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" name="status">
+            <option value="">Todos os status</option>
+            <option value="para_ler" <%= status === 'para_ler' ? 'selected' : '' %>>Para Ler</option>
+            <option value="lendo" <%= status === 'lendo' ? 'selected' : '' %>>Lendo</option>
+            <option value="lido" <%= status === 'lido' ? 'selected' : '' %>>Lido</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" name="ordenacao">
+            <option value="recentes" <%= ordenacao === 'recentes' ? 'selected' : '' %>>Mais Recentes</option>
+            <option value="antigos" <%= ordenacao === 'antigos' ? 'selected' : '' %>>Mais Antigos</option>
+            <option value="titulo" <%= ordenacao === 'titulo' ? 'selected' : '' %>>Título A-Z</option>
+            <option value="autor" <%= ordenacao === 'autor' ? 'selected' : '' %>>Autor A-Z</option>
+            <option value="avaliacao" <%= ordenacao === 'avaliacao' ? 'selected' : '' %>>Melhor Avaliados</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-outline-primary w-100">
+            <i class="fas fa-search"></i> Buscar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Lista de Livros -->
+  <% if (livros && livros.length > 0) { %>
+    <div class="card glass">
+      <div class="card-header">
+        <h5 class="mb-0">
+          <i class="fas fa-list"></i> Livros (<%= totalLivros %>)
+        </h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Autor</th>
+                <th>Gênero</th>
+                <th>Status</th>
+                <th>Avaliação</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% livros.forEach(function(livro) { %>
+                <tr>
+                  <td><strong><%= livro.titulo %></strong></td>
+                  <td><%= livro.autor %></td>
+                  <td><%= livro.genero || '-' %></td>
+                  <td>
+                    <% if (livro.status === 'lido') { %>
+                      <span class="badge bg-success">Lido</span>
+                    <% } else if (livro.status === 'lendo') { %>
+                      <span class="badge bg-warning">Lendo</span>
+                    <% } else { %>
+                      <span class="badge bg-info">Para Ler</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (livro.avaliacao) { %>
+                      <span class="text-warning"><%= '⭐'.repeat(livro.avaliacao) %></span>
+                    <% } else { %>
+                      <span class="text-muted">-</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <button type="button" class="btn btn-outline-info" 
+                              onclick="verDetalhes(<%= livro.id %>)" title="Ver Detalhes">
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <a href="/livros/editar/<%= livro.id %>" class="btn btn-outline-primary" title="Editar">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <button type="button" class="btn btn-outline-danger" 
+                              onclick="confirmarExclusao(<%= livro.id %>, '<%= livro.titulo %>')" title="Excluir">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  <% } else { %>
+    <div class="card glass">
+      <div class="card-body text-center py-5">
+        <i class="fas fa-books fa-3x text-muted mb-3"></i>
+        <h4>Nenhum livro encontrado</h4>
+        <p class="text-muted">Adicione seu primeiro livro para começar!</p>
+        <a href="/livros/novo" class="btn btn-primary">
+          <i class="fas fa-plus"></i> Adicionar Livro
+        </a>
+      </div>
+    </div>
+  <% } %>
 </div>
 
-<%- include('partials/footer') %> 
+<!-- Modal de Exclusão -->
+<div class="modal fade" id="modalExclusao" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmar Exclusão</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Tem certeza que deseja excluir o livro <strong id="livroTitulo"></strong>?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <form id="formExclusao" method="POST" style="display: inline;">
+          <button type="submit" class="btn btn-danger">Excluir</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Detalhes -->
+<div class="modal fade" id="modalDetalhes" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detalhes do Livro</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="detalhesConteudo">
+        <div class="text-center">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Carregando...</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        <a href="#" id="btnEditar" class="btn btn-primary">Editar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>
+
+<!-- JavaScript específico para livros -->
+<script src="/livros.js"></script> 
