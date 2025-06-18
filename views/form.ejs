@@ -85,6 +85,102 @@
             <textarea class="form-control" id="descricao" name="descricao" rows="3"><%= livro ? livro.descricao : '' %></textarea>
           </div>
 
+          <!-- ISBN -->
+          <div class="col-md-6">
+            <label for="isbn" class="form-label">
+              <i class="fas fa-barcode"></i> ISBN
+            </label>
+            <input type="text" class="form-control" id="isbn" name="isbn" 
+                   value="<%= livro ? livro.isbn : '' %>" maxlength="13" 
+                   placeholder="978-0-000000-00-0">
+          </div>
+
+          <!-- Páginas -->
+          <div class="col-md-6">
+            <label for="paginas" class="form-label">
+              <i class="fas fa-file-alt"></i> Número de Páginas
+            </label>
+            <input type="number" class="form-control" id="paginas" name="paginas" 
+                   value="<%= livro ? livro.paginas : '' %>" min="1">
+          </div>
+
+          <!-- Editora -->
+          <div class="col-md-6">
+            <label for="editora" class="form-label">
+              <i class="fas fa-building"></i> Editora
+            </label>
+            <input type="text" class="form-control" id="editora" name="editora" 
+                   value="<%= livro ? livro.editora : '' %>">
+          </div>
+
+          <!-- Idioma -->
+          <div class="col-md-6">
+            <label for="idioma" class="form-label">
+              <i class="fas fa-language"></i> Idioma
+            </label>
+            <select class="form-select" id="idioma" name="idioma">
+              <option value="">Selecione...</option>
+              <option value="Português" <%= livro && livro.idioma === 'Português' ? 'selected' : '' %>>Português</option>
+              <option value="Inglês" <%= livro && livro.idioma === 'Inglês' ? 'selected' : '' %>>Inglês</option>
+              <option value="Espanhol" <%= livro && livro.idioma === 'Espanhol' ? 'selected' : '' %>>Espanhol</option>
+              <option value="Francês" <%= livro && livro.idioma === 'Francês' ? 'selected' : '' %>>Francês</option>
+              <option value="Alemão" <%= livro && livro.idioma === 'Alemão' ? 'selected' : '' %>>Alemão</option>
+              <option value="Italiano" <%= livro && livro.idioma === 'Italiano' ? 'selected' : '' %>>Italiano</option>
+              <option value="Outro" <%= livro && livro.idioma === 'Outro' ? 'selected' : '' %>>Outro</option>
+            </select>
+          </div>
+
+          <!-- Formato -->
+          <div class="col-md-6">
+            <label for="formato" class="form-label">
+              <i class="fas fa-book-open"></i> Formato
+            </label>
+            <select class="form-select" id="formato" name="formato">
+              <option value="">Selecione...</option>
+              <option value="Físico" <%= livro && livro.formato === 'Físico' ? 'selected' : '' %>>Físico</option>
+              <option value="E-book" <%= livro && livro.formato === 'E-book' ? 'selected' : '' %>>E-book</option>
+              <option value="Audiobook" <%= livro && livro.formato === 'Audiobook' ? 'selected' : '' %>>Audiobook</option>
+              <option value="PDF" <%= livro && livro.formato === 'PDF' ? 'selected' : '' %>>PDF</option>
+            </select>
+          </div>
+
+          <!-- Data de Início -->
+          <div class="col-md-6">
+            <label for="data_inicio" class="form-label">
+              <i class="fas fa-calendar-plus"></i> Data de Início da Leitura
+            </label>
+            <input type="date" class="form-control" id="data_inicio" name="data_inicio" 
+                   value="<%= livro && livro.data_inicio ? livro.data_inicio.toISOString().split('T')[0] : '' %>">
+          </div>
+
+          <!-- Data de Conclusão -->
+          <div class="col-md-6">
+            <label for="data_conclusao" class="form-label">
+              <i class="fas fa-calendar-check"></i> Data de Conclusão
+            </label>
+            <input type="date" class="form-control" id="data_conclusao" name="data_conclusao" 
+                   value="<%= livro && livro.data_conclusao ? livro.data_conclusao.toISOString().split('T')[0] : '' %>">
+          </div>
+
+          <!-- Tags -->
+          <div class="col-md-6">
+            <label for="tags" class="form-label">
+              <i class="fas fa-tags"></i> Tags
+            </label>
+            <input type="text" class="form-control" id="tags" name="tags" 
+                   value="<%= livro ? livro.tags : '' %>" 
+                   placeholder="Ex: ficção, romance, tecnologia (separadas por vírgula)">
+          </div>
+
+          <!-- Notas -->
+          <div class="col-12">
+            <label for="notas" class="form-label">
+              <i class="fas fa-sticky-note"></i> Notas Pessoais
+            </label>
+            <textarea class="form-control" id="notas" name="notas" rows="3" 
+                      placeholder="Suas anotações, resenhas ou observações sobre o livro"><%= livro ? livro.notas : '' %></textarea>
+          </div>
+
           <!-- Botões -->
           <div class="col-12">
             <div class="d-flex gap-3 justify-content-end">

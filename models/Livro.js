@@ -28,14 +28,20 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(50),
       allowNull: true,
       validate: {
-        len: [2, 50]
+        len: {
+          args: [2, 50],
+          msg: 'Gênero deve ter entre 2 e 50 caracteres'
+        }
       }
     },
     isbn: {
       type: DataTypes.STRING(13),
       allowNull: true,
       validate: {
-        len: [10, 13]
+        len: {
+          args: [10, 13],
+          msg: 'ISBN deve ter entre 10 e 13 caracteres'
+        }
       }
     },
     descricao: {

@@ -23,12 +23,12 @@
   <div class="card glass mb-4">
     <div class="card-body">
       <form method="GET" action="/livros" class="row g-3">
-        <div class="col-md-4">
+        <div class="col-md-3">
           <input type="text" class="form-control" name="busca" 
                  placeholder="Buscar por título, autor ou gênero..." 
                  value="<%= busca %>">
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
           <select class="form-select" name="status">
             <option value="">Todos os status</option>
             <option value="para_ler" <%= status === 'para_ler' ? 'selected' : '' %>>Para Ler</option>
@@ -36,7 +36,16 @@
             <option value="lido" <%= status === 'lido' ? 'selected' : '' %>>Lido</option>
           </select>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
+          <select class="form-select" name="formato">
+            <option value="">Todos os formatos</option>
+            <option value="Físico" <%= formato === 'Físico' ? 'selected' : '' %>>Físico</option>
+            <option value="E-book" <%= formato === 'E-book' ? 'selected' : '' %>>E-book</option>
+            <option value="Audiobook" <%= formato === 'Audiobook' ? 'selected' : '' %>>Audiobook</option>
+            <option value="PDF" <%= formato === 'PDF' ? 'selected' : '' %>>PDF</option>
+          </select>
+        </div>
+        <div class="col-md-2">
           <select class="form-select" name="ordenacao">
             <option value="recentes" <%= ordenacao === 'recentes' ? 'selected' : '' %>>Mais Recentes</option>
             <option value="antigos" <%= ordenacao === 'antigos' ? 'selected' : '' %>>Mais Antigos</option>
@@ -45,10 +54,15 @@
             <option value="avaliacao" <%= ordenacao === 'avaliacao' ? 'selected' : '' %>>Melhor Avaliados</option>
           </select>
         </div>
-        <div class="col-md-2">
-          <button type="submit" class="btn btn-outline-primary w-100">
-            <i class="fas fa-search"></i> Buscar
-          </button>
+        <div class="col-md-3">
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-outline-primary flex-fill">
+              <i class="fas fa-search"></i> Buscar
+            </button>
+            <a href="/livros" class="btn btn-outline-secondary">
+              <i class="fas fa-times"></i> Limpar
+            </a>
+          </div>
         </div>
       </form>
     </div>
@@ -72,13 +86,20 @@
                 <th>Gênero</th>
                 <th>Status</th>
                 <th>Avaliação</th>
+                <th>Formato</th>
+                <th>Páginas</th>
                 <th>Ações</th>
               </tr>
             </thead>
             <tbody>
               <% livros.forEach(function(livro) { %>
                 <tr>
-                  <td><strong><%= livro.titulo %></strong></td>
+                  <td>
+                    <strong><%= livro.titulo %></strong>
+                    <% if (livro.ano) { %>
+                      <br><small class="text-muted"><%= livro.ano %></small>
+                    <% } %>
+                  </td>
                   <td><%= livro.autor %></td>
                   <td><%= livro.genero || '-' %></td>
                   <td>
@@ -93,6 +114,20 @@
                   <td>
                     <% if (livro.avaliacao) { %>
                       <span class="text-warning"><%= '⭐'.repeat(livro.avaliacao) %></span>
+                    <% } else { %>
+                      <span class="text-muted">-</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (livro.formato) { %>
+                      <span class="badge bg-secondary"><%= livro.formato %></span>
+                    <% } else { %>
+                      <span class="text-muted">-</span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <% if (livro.paginas) { %>
+                      <span class="text-muted"><%= livro.paginas %> p.</span>
                     <% } else { %>
                       <span class="text-muted">-</span>
                     <% } %>
@@ -117,6 +152,62 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Paginação -->
+        <% if (totalPages > 1) { %>
+          <div class="card glass mt-4">
+            <div class="card-body">
+              <nav aria-label="Navegação de páginas">
+                <ul class="pagination justify-content-center mb-0">
+                  <!-- Botão Anterior -->
+                  <% if (page > 1) { %>
+                    <li class="page-item">
+                      <a class="page-link" href="/livros?page=<%= page - 1 %>&busca=<%= busca %>&status=<%= status %>&formato=<%= formato %>&ordenacao=<%= ordenacao %>">
+                        <i class="fas fa-chevron-left"></i> Anterior
+                      </a>
+                    </li>
+                  <% } else { %>
+                    <li class="page-item disabled">
+                      <span class="page-link">
+                        <i class="fas fa-chevron-left"></i> Anterior
+                      </span>
+                    </li>
+                  <% } %>
+
+                  <!-- Números das Páginas -->
+                  <% for (var i = 1; i <= totalPages; i++) { %>
+                    <li class="page-item <%= i === page ? 'active' : '' %>">
+                      <a class="page-link" href="/livros?page=<%= i %>&busca=<%= busca %>&status=<%= status %>&formato=<%= formato %>&ordenacao=<%= ordenacao %>"><%= i %></a>
+                    </li>
+                  <% } %>
+
+                  <!-- Botão Próximo -->
+                  <% if (page < totalPages) { %>
+                    <li class="page-item">
+                      <a class="page-link" href="/livros?page=<%= page + 1 %>&busca=<%= busca %>&status=<%= status %>&formato=<%= formato %>&ordenacao=<%= ordenacao %>">
+                        Próximo <i class="fas fa-chevron-right"></i>
+                      </a>
+                    </li>
+                  <% } else { %>
+                    <li class="page-item disabled">
+                      <span class="page-link">
+                        Próximo <i class="fas fa-chevron-right"></i>
+                      </span>
+                    </li>
+                  <% } %>
+                </ul>
+              </nav>
+
+              <!-- Informações da paginação -->
+              <div class="text-center mt-3">
+                <small class="text-muted">
+                  Página <strong><%= page %></strong> de <strong><%= totalPages %></strong> 
+                  (<%= totalLivros %> livros no total)
+                </small>
+              </div>
+            </div>
+          </div>
+        <% } %>
       </div>
     </div>
   <% } else { %>

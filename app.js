@@ -57,11 +57,33 @@ app.use((req, res, next) => {
 });
 
 // Rotas
-app.get('/', (req, res) => {
-  res.render('index', {
-    titulo: 'BookManager - Gerenciador de Livros',
-    descricao: 'Sistema simples e eficiente para gerenciar sua biblioteca pessoal'
-  });
+app.get('/', async (req, res) => {
+  try {
+    // Buscar estatísticas básicas para a página inicial
+    const totalLivros = await Livro.count();
+    const livrosLidos = await Livro.count({ where: { status: 'lido' } });
+    const livrosLendo = await Livro.count({ where: { status: 'lendo' } });
+    const livrosParaLer = await Livro.count({ where: { status: 'para_ler' } });
+    
+    res.render('index', {
+      titulo: 'BookManager - Gerenciador de Livros',
+      descricao: 'Sistema simples e eficiente para gerenciar sua biblioteca pessoal',
+      totalLivros,
+      livrosLidos,
+      livrosLendo,
+      livrosParaLer
+    });
+  } catch (error) {
+    console.error('Erro ao carregar página inicial:', error);
+    res.render('index', {
+      titulo: 'BookManager - Gerenciador de Livros',
+      descricao: 'Sistema simples e eficiente para gerenciar sua biblioteca pessoal',
+      totalLivros: 0,
+      livrosLidos: 0,
+      livrosLendo: 0,
+      livrosParaLer: 0
+    });
+  }
 });
 
 // Rotas de livros

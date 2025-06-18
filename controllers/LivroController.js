@@ -9,6 +9,7 @@ class LivroController {
     try {
       const busca = req.query.busca || '';
       const status = req.query.status || '';
+      const formato = req.query.formato || '';
       const ordenacao = req.query.ordenacao || 'recentes';
       const page = parseInt(req.query.page) || 1;
       const limit = 10;
@@ -20,7 +21,9 @@ class LivroController {
           [Op.or]: [
             { titulo: { [Op.like]: `%${busca}%` } },
             { autor: { [Op.like]: `%${busca}%` } },
-            { genero: { [Op.like]: `%${busca}%` } }
+            { genero: { [Op.like]: `%${busca}%` } },
+            { editora: { [Op.like]: `%${busca}%` } },
+            { tags: { [Op.like]: `%${busca}%` } }
           ]
         };
       }
@@ -28,6 +31,11 @@ class LivroController {
       // Adicionar filtro de status
       if (status) {
         where.status = status;
+      }
+
+      // Adicionar filtro de formato
+      if (formato) {
+        where.formato = formato;
       }
 
       // Definir ordenação
@@ -63,6 +71,7 @@ class LivroController {
         livros, 
         busca, 
         status,
+        formato,
         ordenacao,
         page, 
         totalPages,
@@ -74,6 +83,7 @@ class LivroController {
         livros: [], 
         busca: req.query.busca || '', 
         status: req.query.status || '',
+        formato: req.query.formato || '',
         ordenacao: req.query.ordenacao || 'recentes',
         page: 1, 
         totalPages: 1, 
@@ -96,6 +106,7 @@ class LivroController {
   // Criar novo livro
   static async criar(req, res) {
     const erros = validationResult(req);
+    
     if (!erros.isEmpty()) {
       return res.render('form', {
         livro: req.body,
@@ -106,7 +117,27 @@ class LivroController {
     }
 
     try {
-      const novoLivro = await Livro.create(req.body);
+      // Tratar campos vazios
+      const dadosLivro = { ...req.body };
+      
+      // Converter campos vazios para null
+      const camposParaTratar = ['genero', 'isbn', 'descricao', 'editora', 'idioma', 'formato', 'tags', 'notas'];
+      camposParaTratar.forEach(campo => {
+        if (dadosLivro[campo] === '') {
+          dadosLivro[campo] = null;
+        }
+      });
+      
+      // Tratar campos numéricos
+      if (dadosLivro.ano === '') dadosLivro.ano = null;
+      if (dadosLivro.paginas === '') dadosLivro.paginas = null;
+      if (dadosLivro.avaliacao === '') dadosLivro.avaliacao = null;
+      
+      // Tratar datas
+      if (dadosLivro.data_inicio === '') dadosLivro.data_inicio = null;
+      if (dadosLivro.data_conclusao === '') dadosLivro.data_conclusao = null;
+      
+      const novoLivro = await Livro.create(dadosLivro);
       req.flash('success', 'Livro cadastrado com sucesso!');
       res.redirect('/livros');
     } catch (error) {
@@ -140,26 +171,16 @@ class LivroController {
 
   // Atualizar livro
   static async atualizar(req, res) {
-    console.log('🔄 === INÍCIO DA ATUALIZAÇÃO ===');
-    console.log('ID do livro:', req.params.id);
-    console.log('Dados recebidos:', JSON.stringify(req.body, null, 2));
-    console.log('Headers:', req.headers['content-type']);
-    
     const erros = validationResult(req);
-    console.log('Erros de validação:', erros.array());
     
     try {
       const livro = await Livro.findByPk(req.params.id);
       if (!livro) {
-        console.log('❌ Livro não encontrado');
         req.flash('error', 'Livro não encontrado');
         return res.redirect('/livros');
       }
 
-      console.log('✅ Livro encontrado:', livro.titulo);
-
       if (!erros.isEmpty()) {
-        console.log('❌ Erros de validação encontrados');
         return res.render('form', {
           livro: { ...req.body, id: req.params.id },
           acao: `/livros/editar/${req.params.id}`,
@@ -168,13 +189,31 @@ class LivroController {
         });
       }
 
-      console.log('✅ Atualizando livro no banco...');
-      await livro.update(req.body);
-      console.log('✅ Livro atualizado com sucesso!');
+      // Tratar campos vazios
+      const dadosLivro = { ...req.body };
+      
+      // Converter campos vazios para null
+      const camposParaTratar = ['genero', 'isbn', 'descricao', 'editora', 'idioma', 'formato', 'tags', 'notas'];
+      camposParaTratar.forEach(campo => {
+        if (dadosLivro[campo] === '') {
+          dadosLivro[campo] = null;
+        }
+      });
+      
+      // Tratar campos numéricos
+      if (dadosLivro.ano === '') dadosLivro.ano = null;
+      if (dadosLivro.paginas === '') dadosLivro.paginas = null;
+      if (dadosLivro.avaliacao === '') dadosLivro.avaliacao = null;
+      
+      // Tratar datas
+      if (dadosLivro.data_inicio === '') dadosLivro.data_inicio = null;
+      if (dadosLivro.data_conclusao === '') dadosLivro.data_conclusao = null;
+      
+      await livro.update(dadosLivro);
       req.flash('success', 'Livro atualizado com sucesso!');
       res.redirect('/livros');
     } catch (error) {
-      console.error('❌ Erro ao atualizar livro:', error);
+      console.error('Erro ao atualizar livro:', error);
       req.flash('error', 'Erro ao atualizar livro: ' + error.message);
       res.redirect('/livros');
     }
