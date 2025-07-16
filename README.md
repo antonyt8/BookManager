@@ -268,3 +268,79 @@ O BookManager nasceu da necessidade de ter uma ferramenta moderna e intuitiva pa
 - **Modo escuro/claro**: Alternância de tema
 
 > **Nota**: Estas funcionalidades estão planejadas para versões futuras do projeto.
+
+## Configuração do PostgreSQL
+
+1. **Crie o banco de dados e o usuário:**
+
+No terminal, acesse o PostgreSQL:
+
+```
+sudo -u postgres psql
+```
+
+E execute:
+
+```
+CREATE DATABASE bookmanager;
+CREATE USER meuusuario WITH PASSWORD 'minhasenha';
+GRANT ALL PRIVILEGES ON DATABASE bookmanager TO meuusuario;
+\q
+```
+
+2. **Crie o arquivo `.env` na raiz do projeto:**
+
+```
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=bookmanager
+DB_USER=meuusuario
+DB_PASS=minhasenha
+```
+
+3. **Instale as dependências:**
+
+```
+npm install
+```
+
+4. **Rode a aplicação:**
+
+```
+npm run dev
+```
+
+---
+
+## Autenticação e Multiusuário
+
+- Cada usuário pode se cadastrar e terá sua própria biblioteca de livros.
+- Após login, só é possível visualizar, cadastrar, editar e excluir livros do próprio usuário.
+- O menu exibe o nome do usuário logado e opção de logout.
+
+---
+
+## Migração de dados do SQLite para PostgreSQL
+
+1. Exporte os dados do SQLite para CSV:
+
+```
+sqlite3 database.sqlite
+.headers on
+.mode csv
+.output livros.csv
+SELECT * FROM livros;
+.exit
+```
+
+2. Adapte o CSV para incluir a coluna `userId` (preencha com o id do usuário desejado).
+
+3. Importe no PostgreSQL:
+
+```
+\copy livros FROM '/caminho/para/livros.csv' DELIMITER ',' CSV HEADER;
+```
+
+---
+
+Para dúvidas ou problemas, abra uma issue!

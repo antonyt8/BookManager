@@ -102,12 +102,24 @@ module.exports = (sequelize, DataTypes) => {
     tags: {
       type: DataTypes.STRING(200),
       allowNull: true
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'users',
+        key: 'id'
+      }
     }
   }, {
     tableName: 'livros',
     timestamps: true,
     underscored: true
   });
+
+  Livro.associate = (models) => {
+    Livro.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
+  };
 
   // Métodos de instância
   Livro.prototype.getAvaliacaoTexto = function() {

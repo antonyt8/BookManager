@@ -7,6 +7,7 @@ class LivroController {
   // Listar livros com busca e paginação
   static async listar(req, res) {
     try {
+      const userId = req.session.user.id;
       const busca = req.query.busca || '';
       const status = req.query.status || '';
       const formato = req.query.formato || '';
@@ -15,9 +16,10 @@ class LivroController {
       const limit = 10;
       const offset = (page - 1) * limit;
       
-      let where = {};
+      let where = { userId };
       if (busca) {
         where = {
+          ...where,
           [Op.or]: [
             { titulo: { [Op.like]: `%${busca}%` } },
             { autor: { [Op.like]: `%${busca}%` } },
@@ -27,56 +29,20 @@ class LivroController {
           ]
         };
       }
-
-      // Adicionar filtro de status
-      if (status) {
-        where.status = status;
-      }
-
-      // Adicionar filtro de formato
-      if (formato) {
-        where.formato = formato;
-      }
-
-      // Definir ordenação
+      if (status) where.status = status;
+      if (formato) where.formato = formato;
       let order = [];
       switch (ordenacao) {
-        case 'antigos':
-          order = [['createdAt', 'ASC']];
-          break;
-        case 'titulo':
-          order = [['titulo', 'ASC']];
-          break;
-        case 'autor':
-          order = [['autor', 'ASC']];
-          break;
-        case 'avaliacao':
-          order = [['avaliacao', 'DESC'], ['titulo', 'ASC']];
-          break;
-        default: // recentes
-          order = [['createdAt', 'DESC']];
+        case 'antigos': order = [['createdAt', 'ASC']]; break;
+        case 'titulo': order = [['titulo', 'ASC']]; break;
+        case 'autor': order = [['autor', 'ASC']]; break;
+        case 'avaliacao': order = [['avaliacao', 'DESC'], ['titulo', 'ASC']]; break;
+        default: order = [['createdAt', 'DESC']];
       }
-
-      const livros = await Livro.findAll({
-        where,
-        limit,
-        offset,
-        order
-      });
-
+      const livros = await Livro.findAll({ where, limit, offset, order });
       const count = await Livro.count({ where });
       const totalPages = Math.max(1, Math.ceil(count / limit));
-      
-      res.render('livros', { 
-        livros, 
-        busca, 
-        status,
-        formato,
-        ordenacao,
-        page, 
-        totalPages,
-        totalLivros: count
-      });
+      res.render('livros', { livros, busca, status, formato, ordenacao, page, totalPages, totalLivros: count });
     } catch (error) {
       console.error('Erro ao listar livros:', error);
       res.render('livros', { 
@@ -136,6 +102,7 @@ class LivroController {
       // Tratar datas
       if (dadosLivro.data_inicio === '') dadosLivro.data_inicio = null;
       if (dadosLivro.data_conclusao === '') dadosLivro.data_conclusao = null;
+      dadosLivro.userId = req.session.user.id;
       
       const novoLivro = await Livro.create(dadosLivro);
       req.flash('success', 'Livro cadastrado com sucesso!');
@@ -150,7 +117,8 @@ class LivroController {
   // Mostrar formulário para editar livro
   static async mostrarFormularioEdicao(req, res) {
     try {
-      const livro = await Livro.findByPk(req.params.id);
+      const userId = req.session.user.id;
+      const livro = await Livro.findOne({ where: { id: req.params.id, userId } });
       if (!livro) {
         req.flash('error', 'Livro não encontrado');
         return res.redirect('/livros');
@@ -174,7 +142,8 @@ class LivroController {
     const erros = validationResult(req);
     
     try {
-      const livro = await Livro.findByPk(req.params.id);
+      const userId = req.session.user.id;
+      const livro = await Livro.findOne({ where: { id: req.params.id, userId } });
       if (!livro) {
         req.flash('error', 'Livro não encontrado');
         return res.redirect('/livros');
@@ -222,7 +191,8 @@ class LivroController {
   // Excluir livro
   static async excluir(req, res) {
     try {
-      const livro = await Livro.findByPk(req.params.id);
+      const userId = req.session.user.id;
+      const livro = await Livro.findOne({ where: { id: req.params.id, userId } });
       if (!livro) {
         req.flash('error', 'Livro não encontrado');
         return res.redirect('/livros');
@@ -241,7 +211,8 @@ class LivroController {
   // Buscar livro por ID (para API)
   static async buscarPorId(req, res) {
     try {
-      const livro = await Livro.findByPk(req.params.id);
+      const userId = req.session.user.id;
+      const livro = await Livro.findOne({ where: { id: req.params.id, userId } });
       if (!livro) {
         return res.status(404).json({ error: 'Livro não encontrado' });
       }

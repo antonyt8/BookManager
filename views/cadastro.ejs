@@ -1,0 +1,33 @@
+<%- include('partials/header') %>
+<%- include('partials/nav') %>
+<div class="container fade-in-up">
+  <div class="card glass mb-4">
+    <div class="card-body">
+      <h2><i class="fas fa-user-plus"></i> Cadastro de Usuário</h2>
+      <p class="text-muted">Preencha os campos para criar sua conta.</p>
+    </div>
+  </div>
+  <div class="card glass">
+    <div class="card-body">
+      <form method="POST" action="/usuarios/cadastro">
+        <div class="mb-3">
+          <label for="nome" class="form-label"><i class="fas fa-user"></i> Nome</label>
+          <input type="text" class="form-control" id="nome" name="nome" required autofocus>
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label"><i class="fas fa-envelope"></i> E-mail</label>
+          <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        <div class="mb-3">
+          <label for="senha" class="form-label"><i class="fas fa-lock"></i> Senha</label>
+          <input type="password" class="form-control" id="senha" name="senha" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Cadastrar</button>
+      </form>
+      <div class="mt-3 text-center">
+        <a href="/usuarios/login">Já tem conta? Faça login</a>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('partials/footer') %> 

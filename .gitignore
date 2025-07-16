@@ -7,9 +7,9 @@ logs/
 npm-debug.log*
 
 # Banco de dados
-# *.sqlite
-# *.sqlite3
-# *.db
+*.sqlite
+*.sqlite3
+*.db
 
 # Arquivos temporários
 tmp/

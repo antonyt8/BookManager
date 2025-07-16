@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const LivroController = require('../controllers/LivroController');
 const { livroValidation } = require('../middleware/validation');
+const auth = require('../middleware/auth');
+
+// Proteger todas as rotas
+router.use(auth);
 
 // Rotas para listagem e criação
 router.get('/', LivroController.listar);

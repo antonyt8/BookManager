@@ -8,7 +8,12 @@ const flash = require('connect-flash');
 // Importações da nova estrutura
 const sequelize = require('./config/database');
 const { Op } = require('sequelize');
+const User = require('./models/User')(sequelize, require('sequelize').DataTypes);
 const Livro = require('./models/Livro')(sequelize, require('sequelize').DataTypes);
+
+// Associação
+Livro.associate && Livro.associate({ User });
+User.hasMany(Livro, { foreignKey: 'userId', as: 'livros' });
 
 // Inicialização do Express
 const app = express();
@@ -89,6 +94,9 @@ app.get('/', async (req, res) => {
 // Rotas de livros
 const livrosRoutes = require('./routes/livros');
 app.use('/livros', livrosRoutes);
+
+const usuariosRoutes = require('./routes/usuarios');
+app.use('/usuarios', usuariosRoutes);
 
 // Rota para estatísticas (dashboard)
 app.get('/dashboard', async (req, res) => {

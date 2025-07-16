@@ -1,13 +1,20 @@
 const { Sequelize } = require('sequelize');
+require('dotenv').config();
 
-const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  storage: './database.sqlite',
-  logging: false, // Desabilita logs SQL em produção
-  define: {
-    timestamps: true, // Adiciona createdAt e updatedAt automaticamente
-    underscored: true // Usa snake_case para nomes de colunas
+const sequelize = new Sequelize(
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASS,
+  {
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 5432,
+    dialect: 'postgres',
+    logging: false,
+    define: {
+      timestamps: true,
+      underscored: true
+    }
   }
-});
+);
 
 module.exports = sequelize; 
