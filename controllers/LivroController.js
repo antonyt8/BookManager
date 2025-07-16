@@ -104,6 +104,11 @@ class LivroController {
       if (dadosLivro.data_conclusao === '') dadosLivro.data_conclusao = null;
       dadosLivro.userId = req.session.user.id;
       
+      // Upload de capa
+      if (req.file) {
+        dadosLivro.capa_url = '/uploads/' + req.file.filename;
+      }
+      
       const novoLivro = await Livro.create(dadosLivro);
       req.flash('success', 'Livro cadastrado com sucesso!');
       res.redirect('/livros');
@@ -179,6 +184,10 @@ class LivroController {
       if (dadosLivro.data_conclusao === '') dadosLivro.data_conclusao = null;
       
       await livro.update(dadosLivro);
+      // Upload de capa
+      if (req.file) {
+        await livro.update({ capa_url: '/uploads/' + req.file.filename });
+      }
       req.flash('success', 'Livro atualizado com sucesso!');
       res.redirect('/livros');
     } catch (error) {

@@ -11,7 +11,7 @@
 
   <div class="card glass">
     <div class="card-body">
-      <form method="POST" action="<%= livro && livro.id ? `/livros/editar/${livro.id}` : '/livros/novo' %>">
+      <form method="POST" enctype="multipart/form-data" action="<%= livro && livro.id ? `/livros/editar/${livro.id}` : '/livros/novo' %>">
         <div class="row g-3">
           <!-- Título -->
           <div class="col-md-8">
@@ -244,6 +244,20 @@
             </label>
             <textarea class="form-control" id="notas" name="notas" rows="3" 
                       placeholder="Suas anotações, resenhas ou observações sobre o livro"><%= livro ? livro.notas : '' %></textarea>
+          </div>
+
+          <!-- Capa do Livro -->
+          <div class="col-md-6">
+            <label for="capa" class="form-label">
+              <i class="fas fa-image"></i> Capa do Livro
+            </label>
+            <% if (livro && livro.capa_url) { %>
+              <div class="mb-2">
+                <img src="<%= livro.capa_url %>" alt="Capa do Livro" class="img-thumbnail" style="max-height: 120px;">
+              </div>
+            <% } %>
+            <input type="file" class="form-control" id="capa" name="capa">
+            <small class="form-text text-muted">Formatos aceitos: JPG, PNG. Tamanho máximo: 2MB.</small>
           </div>
 
           <!-- Botões -->

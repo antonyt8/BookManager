@@ -81,6 +81,7 @@
           <table class="table table-hover">
             <thead>
               <tr>
+                <th>Capa</th>
                 <th>Título</th>
                 <th>Autor</th>
                 <th>Gênero</th>
@@ -94,6 +95,13 @@
             <tbody>
               <% livros.forEach(function(livro) { %>
                 <tr>
+                  <td>
+                    <% if (livro.capa_url) { %>
+                      <img src="<%= livro.capa_url %>" alt="Capa" class="img-thumbnail" style="max-height: 60px;">
+                    <% } else { %>
+                      <span class="text-muted">-</span>
+                    <% } %>
+                  </td>
                   <td>
                     <strong><%= livro.titulo %></strong>
                     <% if (livro.ano) { %>

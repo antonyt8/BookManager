@@ -64,12 +64,15 @@ app.use((req, res, next) => {
 // Rotas
 app.get('/', async (req, res) => {
   try {
-    // Buscar estatísticas básicas para a página inicial
-    const totalLivros = await Livro.count();
-    const livrosLidos = await Livro.count({ where: { status: 'lido' } });
-    const livrosLendo = await Livro.count({ where: { status: 'lendo' } });
-    const livrosParaLer = await Livro.count({ where: { status: 'para_ler' } });
-    
+    const userId = req.session.user?.id;
+    let totalLivros = 0, livrosLidos = 0, livrosLendo = 0, livrosParaLer = 0;
+    if (userId) {
+      const where = { userId };
+      totalLivros = await Livro.count({ where });
+      livrosLidos = await Livro.count({ where: { ...where, status: 'lido' } });
+      livrosLendo = await Livro.count({ where: { ...where, status: 'lendo' } });
+      livrosParaLer = await Livro.count({ where: { ...where, status: 'para_ler' } });
+    }
     res.render('index', {
       titulo: 'BookManager - Gerenciador de Livros',
       descricao: 'Sistema simples e eficiente para gerenciar sua biblioteca pessoal',
@@ -98,14 +101,22 @@ app.use('/livros', livrosRoutes);
 const usuariosRoutes = require('./routes/usuarios');
 app.use('/usuarios', usuariosRoutes);
 
+const apiRoutes = require('./routes/api');
+app.use('/api', apiRoutes);
+
 // Rota para estatísticas (dashboard)
 app.get('/dashboard', async (req, res) => {
+  if (!req.session.user) {
+    req.flash('error', 'Você precisa estar logado para acessar o dashboard.');
+    return res.redirect('/usuarios/login');
+  }
   try {
-    // Buscar dados para o dashboard
-    const totalLivros = await Livro.count();
-    const livrosLidos = await Livro.count({ where: { status: 'lido' } });
-    const livrosLendo = await Livro.count({ where: { status: 'lendo' } });
-    const livrosParaLer = await Livro.count({ where: { status: 'para_ler' } });
+    const userId = req.session.user.id;
+    const where = { userId };
+    const totalLivros = await Livro.count({ where });
+    const livrosLidos = await Livro.count({ where: { ...where, status: 'lido' } });
+    const livrosLendo = await Livro.count({ where: { ...where, status: 'lendo' } });
+    const livrosParaLer = await Livro.count({ where: { ...where, status: 'para_ler' } });
     
     // Buscar livros por gênero
     const livrosPorGenero = await Livro.findAll({
@@ -113,6 +124,7 @@ app.get('/dashboard', async (req, res) => {
         'genero',
         [sequelize.fn('COUNT', sequelize.col('id')), 'quantidade']
       ],
+      where,
       group: ['genero'],
       order: [[sequelize.fn('COUNT', sequelize.col('id')), 'DESC']]
     });
@@ -129,17 +141,17 @@ app.get('/dashboard', async (req, res) => {
       : null;
     
     // Média de avaliação
-    const livrosAvaliados = await Livro.count({ where: { avaliacao: { [Op.not]: null } } });
-    const totalAvaliacao = await Livro.sum('avaliacao');
+    const livrosAvaliados = await Livro.count({ where: { ...where, avaliacao: { [Op.not]: null } } });
+    const totalAvaliacao = await Livro.sum('avaliacao', { where });
     const mediaAvaliacao = livrosAvaliados > 0 ? totalAvaliacao / livrosAvaliados : 0;
     
     // Total de páginas
-    const totalPaginas = await Livro.sum('paginas') || 0;
-    const livrosComPaginas = await Livro.count({ where: { paginas: { [Op.not]: null } } });
+    const totalPaginas = await Livro.sum('paginas', { where }) || 0;
+    const livrosComPaginas = await Livro.count({ where: { ...where, paginas: { [Op.not]: null } } });
     
     // Melhores avaliações
     const melhoresAvaliacoes = await Livro.findAll({
-      where: { avaliacao: { [Op.not]: null } },
+      where: { ...where, avaliacao: { [Op.not]: null } },
       order: [['avaliacao', 'DESC']],
       limit: 5,
       attributes: { include: ['created_at', 'updated_at'] }
@@ -147,6 +159,7 @@ app.get('/dashboard', async (req, res) => {
     
     // Livros recentes
     const livrosRecentes = await Livro.findAll({
+      where,
       order: [['created_at', 'DESC']],
       limit: 5,
       attributes: { include: ['created_at', 'updated_at'] }
@@ -191,24 +204,5 @@ app.use((error, req, res, next) => {
   });
 });
 
-// Inicialização do servidor
-const iniciarServidor = async () => {
-  try {
-    await sequelize.authenticate();
-    console.log('✅ Conexão com banco de dados estabelecida com sucesso.');
-    
-    await sequelize.sync({ alter: true });
-    console.log('✅ Modelos sincronizados com o banco de dados.');
-    
-    app.listen(port, () => {
-      console.log(`🚀 Servidor rodando em http://localhost:${port}`);
-      console.log(`📚 BookManager iniciado com sucesso!`);
-      console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
-    });
-  } catch (error) {
-    console.error('❌ Erro ao iniciar servidor:', error);
-    process.exit(1);
-  }
-};
-
-iniciarServidor(); 
+// Remover a inicialização do servidor daqui
+module.exports = app; 
