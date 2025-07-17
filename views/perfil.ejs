@@ -18,7 +18,16 @@
           </ul>
         </div>
       <% } %>
-      <form method="POST" action="/usuarios/perfil">
+      <form method="POST" action="/usuarios/perfil" enctype="multipart/form-data">
+        <div class="mb-3 text-center">
+          <% if (user.avatar_url) { %>
+            <img src="<%= user.avatar_url %>" alt="Avatar" class="rounded-circle mb-2" style="max-width: 120px; max-height: 120px;">
+          <% } else { %>
+            <i class="fas fa-user-circle fa-5x text-muted mb-2"></i>
+          <% } %>
+          <input type="file" class="form-control mt-2" id="avatar" name="avatar">
+          <small class="form-text text-muted">Formatos aceitos: JPG, PNG. Tamanho máximo: 2MB.</small>
+        </div>
         <div class="mb-3">
           <label for="nome" class="form-label"><i class="fas fa-user"></i> Nome</label>
           <input type="text" class="form-control" id="nome" name="nome" value="<%= user.nome %>" required>

@@ -9,6 +9,12 @@
   </div>
   <div class="card glass">
     <div class="card-body">
+      <% if (locals.error && error.length > 0) { %>
+        <div class="alert alert-danger"><%= error %></div>
+      <% } %>
+      <% if (locals.success && success.length > 0) { %>
+        <div class="alert alert-success"><%= success %></div>
+      <% } %>
       <form method="POST" action="/usuarios/cadastro">
         <div class="mb-3">
           <label for="nome" class="form-label"><i class="fas fa-user"></i> Nome</label>

@@ -1,9 +1,12 @@
-// require('dotenv').config(); // Comentado temporariamente
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const flash = require('connect-flash');
+const passport = require('./config/passport');
 // const helmet = require('helmet'); // Comentado para compatibilidade com Node.js 14
+const swaggerUi = require('swagger-ui-express');
+const swaggerJSDoc = require('swagger-jsdoc');
 
 // Importações da nova estrutura
 const sequelize = require('./config/database');
@@ -42,6 +45,8 @@ app.use(session({
     maxAge: 24 * 60 * 60 * 1000 // 24 horas
   }
 }));
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Flash messages
 app.use(flash());
@@ -101,8 +106,40 @@ app.use('/livros', livrosRoutes);
 const usuariosRoutes = require('./routes/usuarios');
 app.use('/usuarios', usuariosRoutes);
 
+const adminRoutes = require('./routes/admin');
+app.use('/admin', adminRoutes);
+
 const apiRoutes = require('./routes/api');
 app.use('/api', apiRoutes);
+
+const swaggerDefinition = {
+  openapi: '3.0.0',
+  info: {
+    title: 'BookManager API',
+    version: '1.0.0',
+    description: 'Documentação da API RESTful do BookManager',
+  },
+  servers: [
+    { url: 'http://localhost:3000', description: 'Servidor local' }
+  ],
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      }
+    }
+  },
+  security: [{ bearerAuth: [] }],
+};
+
+const options = {
+  swaggerDefinition,
+  apis: ['./routes/api.js'],
+};
+const swaggerSpec = swaggerJSDoc(options);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Rota para estatísticas (dashboard)
 app.get('/dashboard', async (req, res) => {

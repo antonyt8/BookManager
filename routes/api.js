@@ -18,6 +18,31 @@ function authenticateToken(req, res, next) {
   });
 }
 
+/**
+ * @swagger
+ * /api/register:
+ *   post:
+ *     summary: Cadastro de novo usuário
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nome:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               senha:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Usuário cadastrado
+ *       400:
+ *         description: E-mail já cadastrado
+ */
 // Cadastro
 router.post('/register', async (req, res) => {
   const { nome, email, senha } = req.body;
@@ -31,6 +56,29 @@ router.post('/register', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/login:
+ *   post:
+ *     summary: Login do usuário
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               senha:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Token JWT retornado
+ *       401:
+ *         description: E-mail ou senha inválidos
+ */
 // Login
 router.post('/login', async (req, res) => {
   const { email, senha } = req.body;
@@ -46,6 +94,39 @@ router.post('/login', async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/livros:
+ *   get:
+ *     summary: Listar livros do usuário autenticado
+ *     tags: [Livros]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de livros
+ *   post:
+ *     summary: Criar novo livro
+ *     tags: [Livros]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               titulo:
+ *                 type: string
+ *               autor:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Livro criado
+ */
 // CRUD de livros (protegido)
 router.get('/livros', authenticateToken, async (req, res) => {
   const livros = await Livro.findAll({ where: { userId: req.user.id } });
@@ -62,6 +143,64 @@ router.post('/livros', authenticateToken, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/livros/{id}:
+ *   get:
+ *     summary: Buscar livro por ID
+ *     tags: [Livros]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Livro encontrado
+ *       404:
+ *         description: Livro não encontrado
+ *   put:
+ *     summary: Atualizar livro
+ *     tags: [Livros]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Livro atualizado
+ *       404:
+ *         description: Livro não encontrado
+ *   delete:
+ *     summary: Excluir livro
+ *     tags: [Livros]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Livro excluído
+ *       404:
+ *         description: Livro não encontrado
+ */
 router.get('/livros/:id', authenticateToken, async (req, res) => {
   const livro = await Livro.findOne({ where: { id: req.params.id, userId: req.user.id } });
   if (!livro) return res.status(404).json({ error: 'Livro não encontrado' });

@@ -30,6 +30,24 @@ module.exports = (sequelize, DataTypes) => {
     passwordResetExpires: {
       type: DataTypes.DATE,
       allowNull: true
+    },
+    emailConfirmed: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    },
+    emailConfirmationToken: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    avatar_url: {
+      type: DataTypes.STRING(500),
+      allowNull: true
+    },
+    isAdmin: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
     }
   }, {
     tableName: 'users',
@@ -40,6 +58,13 @@ module.exports = (sequelize, DataTypes) => {
   // Criptografa a senha antes de salvar
   User.beforeCreate(async (user) => {
     user.senha = await bcrypt.hash(user.senha, 10);
+  });
+
+  // Criptografa a senha antes de atualizar, se ela foi modificada
+  User.beforeUpdate(async (user) => {
+    if (user.changed('senha')) {
+      user.senha = await bcrypt.hash(user.senha, 10);
+    }
   });
 
   // Método para validar senha

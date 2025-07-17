@@ -9,6 +9,15 @@
   </div>
   <div class="card glass">
     <div class="card-body">
+      <% if (locals.error && error.length > 0) { %>
+        <div class="alert alert-danger"><%= error %></div>
+      <% } %>
+      <% if (locals.success && success.length > 0) { %>
+        <div class="alert alert-success"><%= success %></div>
+      <% } %>
+      <% if (typeof resetUrl !== 'undefined' && resetUrl) { %>
+        <div class="alert alert-info mt-3">Link de redefinição: <a href="<%= resetUrl %>"><%= resetUrl %></a></div>
+      <% } %>
       <form method="POST" action="/usuarios/recuperar">
         <div class="mb-3">
           <label for="email" class="form-label"><i class="fas fa-envelope"></i> E-mail</label>

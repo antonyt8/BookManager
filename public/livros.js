@@ -70,6 +70,50 @@ async function verDetalhes(id) {
   }
 }
 
+async function buscarGoogleBooks() {
+  const termo = document.getElementById('titulo').value || document.getElementById('isbn').value;
+  if (!termo) {
+    alert('Digite o título ou ISBN para buscar.');
+    return;
+  }
+  const query = encodeURIComponent(termo);
+  const url = `https://www.googleapis.com/books/v1/volumes?q=${query}`;
+  try {
+    const resp = await fetch(url);
+    const data = await resp.json();
+    if (!data.items || data.items.length === 0) {
+      alert('Nenhum livro encontrado.');
+      return;
+    }
+    const livro = data.items[0].volumeInfo;
+    document.getElementById('titulo').value = livro.title || '';
+    document.getElementById('autor').value = (livro.authors && livro.authors.join(', ')) || '';
+    document.getElementById('ano').value = livro.publishedDate ? livro.publishedDate.substring(0,4) : '';
+    document.getElementById('editora').value = livro.publisher || '';
+    document.getElementById('descricao').value = livro.description || '';
+    document.getElementById('isbn').value = (livro.industryIdentifiers && livro.industryIdentifiers[0].identifier) || '';
+    document.getElementById('paginas').value = livro.pageCount || '';
+    document.getElementById('idioma').value = livro.language || '';
+    if (livro.categories && livro.categories.length > 0) {
+      document.getElementById('genero').value = livro.categories.join(', ');
+    }
+    if (livro.imageLinks && livro.imageLinks.thumbnail) {
+      // Exibe a capa, mas não faz upload automático
+      let capaPreview = document.getElementById('capaPreview');
+      if (!capaPreview) {
+        capaPreview = document.createElement('img');
+        capaPreview.id = 'capaPreview';
+        capaPreview.className = 'img-thumbnail mt-2';
+        capaPreview.style.maxHeight = '120px';
+        document.getElementById('capa').parentNode.appendChild(capaPreview);
+      }
+      capaPreview.src = livro.imageLinks.thumbnail;
+    }
+  } catch (e) {
+    alert('Erro ao buscar dados do Google Books.');
+  }
+}
+
 // Auto-submit dos filtros
 document.addEventListener('DOMContentLoaded', function() {
   const ordenacaoSelect = document.querySelector('select[name="ordenacao"]');
