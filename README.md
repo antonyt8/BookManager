@@ -343,4 +343,4 @@ SELECT * FROM livros;
 
 ---
 
-Para dúvidas ou problemas, abra uma issue!
+Para dúvidas ou problemas, abra uma issue!# BookManager
