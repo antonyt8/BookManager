@@ -4,6 +4,7 @@ const { DataTypes, Op } = require('sequelize');
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const logger = require('../config/logger');
 
 // Instanciar modelo User
 const UserModel = User(sequelize, DataTypes);
@@ -17,11 +18,13 @@ exports.cadastrar = async (req, res) => {
   try {
     const existente = await UserModel.findOne({ where: { email } });
     if (existente) {
+      logger.info('Tentativa de cadastro com e-mail já cadastrado', { email, ip: req.ip });
       req.flash('error', 'E-mail já cadastrado!');
       return res.redirect('/usuarios/cadastro');
     }
     const token = crypto.randomBytes(32).toString('hex');
     const user = await UserModel.create({ nome, email, senha, emailConfirmationToken: token });
+    logger.info('Usuário cadastrado com sucesso', { email, ip: req.ip, userId: user.id });
     // Enviar e-mail de confirmação
     const transporter = nodemailer.createTransport({
       service: 'gmail',
@@ -39,6 +42,7 @@ exports.cadastrar = async (req, res) => {
     req.flash('success', 'Cadastro realizado! Confirme seu e-mail para ativar a conta.');
     res.redirect('/usuarios/login');
   } catch (err) {
+    logger.error('Erro ao cadastrar usuário', { email, ip: req.ip, error: err.message });
     console.error('Erro ao cadastrar usuário:', err);
     req.flash('error', 'Erro ao cadastrar usuário.');
     res.redirect('/usuarios/cadastro');
@@ -73,13 +77,16 @@ exports.login = async (req, res) => {
   try {
     const user = await UserModel.findOne({ where: { email } });
     if (!user || !(await user.validarSenha(senha))) {
+      logger.warn('Tentativa de login falhou', { email, ip: req.ip });
       req.flash('error', 'E-mail ou senha inválidos!');
       return res.redirect('/usuarios/login');
     }
+    logger.info('Login realizado com sucesso', { email, ip: req.ip, userId: user.id });
     req.session.user = { id: user.id, nome: user.nome, email: user.email };
     req.flash('success', 'Login realizado com sucesso!');
     res.redirect('/livros');
   } catch (err) {
+    logger.error('Erro ao fazer login', { email, ip: req.ip, error: err.message });
     req.flash('error', 'Erro ao fazer login.');
     res.redirect('/usuarios/login');
   }
@@ -159,6 +166,7 @@ exports.redefinirSenha = async (req, res) => {
   try {
     const user = await UserModel.findOne({ where: { passwordResetToken: token, passwordResetExpires: { [Op.gt]: new Date() } } });
     if (!user) {
+      logger.warn('Tentativa de redefinição de senha com token inválido ou expirado', { token, ip: req.ip });
       req.flash('error', 'Token inválido ou expirado.');
       return res.redirect('/usuarios/recuperar');
     }
@@ -166,9 +174,11 @@ exports.redefinirSenha = async (req, res) => {
     user.passwordResetToken = null;
     user.passwordResetExpires = null;
     await user.save();
+    logger.info('Senha redefinida com sucesso', { email: user.email, userId: user.id, ip: req.ip });
     req.flash('success', 'Senha redefinida com sucesso! Faça login.');
     res.redirect('/usuarios/login');
   } catch (err) {
+    logger.error('Erro ao redefinir senha', { token, ip: req.ip, error: err.message });
     req.flash('error', 'Erro ao redefinir senha.');
     res.redirect('/usuarios/recuperar');
   }
@@ -185,35 +195,25 @@ exports.perfil = async (req, res) => {
 };
 
 exports.atualizarPerfil = async (req, res) => {
+  const userId = req.session.user.id;
+  const { nome, email } = req.body;
   try {
-    const user = await UserModel.findByPk(req.session.user.id);
-    const { nome, email, senha } = req.body;
-    let erros = [];
-    if (!nome || !email) {
-      erros.push({ msg: 'Nome e e-mail são obrigatórios.' });
-    }
-    // Verificar se o e-mail já está em uso por outro usuário
-    const existente = await UserModel.findOne({ where: { email } });
-    if (existente && existente.id !== user.id) {
-      erros.push({ msg: 'E-mail já cadastrado por outro usuário.' });
-    }
-    if (erros.length > 0) {
-      return res.render('perfil', { titulo: 'Meu Perfil', user, erros });
+    const user = await UserModel.findByPk(userId);
+    if (!user) {
+      req.flash('error', 'Usuário não encontrado.');
+      return res.redirect('/usuarios/perfil');
     }
     user.nome = nome;
     user.email = email;
-    if (senha) user.senha = senha;
-    // Upload de avatar
     if (req.file) {
       user.avatar_url = '/uploads/' + req.file.filename;
     }
     await user.save();
-    req.session.user.nome = user.nome;
-    req.session.user.email = user.email;
-    req.session.user.avatar_url = user.avatar_url;
+    logger.info('Perfil atualizado', { userId, email, ip: req.ip });
     req.flash('success', 'Perfil atualizado com sucesso!');
     res.redirect('/usuarios/perfil');
   } catch (err) {
+    logger.error('Erro ao atualizar perfil', { userId, ip: req.ip, error: err.message });
     req.flash('error', 'Erro ao atualizar perfil.');
     res.redirect('/usuarios/perfil');
   }

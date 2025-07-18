@@ -50,9 +50,7 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: false
     }
   }, {
-    tableName: 'users',
-    timestamps: true,
-    underscored: true
+    tableName: 'users'
   });
 
   // Criptografa a senha antes de salvar

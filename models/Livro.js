@@ -117,9 +117,7 @@ module.exports = (sequelize, DataTypes) => {
     underscored: true
   });
 
-  Livro.associate = (models) => {
-    Livro.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
-  };
+  // Remover associate redundante para evitar conflito no sync dos testes
 
   // Métodos de instância
   Livro.prototype.getAvaliacaoTexto = function() {

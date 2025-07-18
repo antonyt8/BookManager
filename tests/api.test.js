@@ -1,10 +1,19 @@
 const request = require('supertest');
 const app = require('../app');
+const { sequelize, User, Livro } = require('../models');
+
+// Associações explícitas
+User.hasMany(Livro, { foreignKey: 'userId' });
+Livro.belongsTo(User, { foreignKey: 'userId' });
 
 describe('API RESTful - Autenticação e Livros', () => {
   let token;
   let livroId;
   const user = { nome: 'ApiUser', email: 'apiuser@example.com', senha: '123456' };
+
+  beforeAll(async () => {
+    await sequelize.sync({ force: true });
+  });
 
   it('deve cadastrar um novo usuário via API', async () => {
     const res = await request(app)

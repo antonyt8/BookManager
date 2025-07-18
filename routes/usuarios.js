@@ -4,6 +4,17 @@ const UserController = require('../controllers/UserController');
 const auth = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
+
+// Limite: 5 tentativas por 15 minutos para login, cadastro e recuperação
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 5,
+  message: 'Muitas tentativas. Tente novamente em alguns minutos.',
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'public/uploads');
@@ -27,12 +38,12 @@ const upload = multer({
 const passport = require('../config/passport');
 
 router.get('/cadastro', UserController.cadastroForm);
-router.post('/cadastro', UserController.cadastrar);
+router.post('/cadastro', authLimiter, UserController.cadastrar);
 router.get('/login', UserController.loginForm);
-router.post('/login', UserController.login);
+router.post('/login', authLimiter, UserController.login);
 router.get('/logout', UserController.logout);
 router.get('/recuperar', UserController.solicitarRecuperacao);
-router.post('/recuperar', UserController.enviarRecuperacao);
+router.post('/recuperar', authLimiter, UserController.enviarRecuperacao);
 router.get('/redefinir/:token', UserController.mostrarRedefinirSenha);
 router.post('/redefinir/:token', UserController.redefinirSenha);
 router.get('/perfil', auth, UserController.perfil);

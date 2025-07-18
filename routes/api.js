@@ -5,6 +5,16 @@ const sequelize = require('../config/database');
 const User = require('../models/User')(sequelize, require('sequelize').DataTypes);
 const Livro = require('../models/Livro')(sequelize, require('sequelize').DataTypes);
 const SECRET = process.env.JWT_SECRET || 'jwtsecret';
+const rateLimit = require('express-rate-limit');
+
+// Limite: 5 tentativas por 15 minutos para login e registro
+const apiAuthLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 5,
+  message: { error: 'Muitas tentativas. Tente novamente em alguns minutos.' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
 
 // Middleware para autenticar via JWT
 function authenticateToken(req, res, next) {
@@ -44,7 +54,7 @@ function authenticateToken(req, res, next) {
  *         description: E-mail já cadastrado
  */
 // Cadastro
-router.post('/register', async (req, res) => {
+router.post('/register', apiAuthLimiter, async (req, res) => {
   const { nome, email, senha } = req.body;
   try {
     const existente = await User.findOne({ where: { email } });
@@ -80,7 +90,7 @@ router.post('/register', async (req, res) => {
  *         description: E-mail ou senha inválidos
  */
 // Login
-router.post('/login', async (req, res) => {
+router.post('/login', apiAuthLimiter, async (req, res) => {
   const { email, senha } = req.body;
   try {
     const user = await User.findOne({ where: { email } });

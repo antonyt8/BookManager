@@ -3,5 +3,5 @@ module.exports = function(req, res, next) {
     return next();
   }
   req.flash('error', 'Acesso restrito a administradores.');
-  res.redirect('/');
+  res.redirect('/usuarios/login');
 }; 

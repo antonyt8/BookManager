@@ -114,6 +114,17 @@ async function buscarGoogleBooks() {
   }
 }
 
+// Dark mode toggle
+function setDarkMode(enabled) {
+  if (enabled) {
+    document.body.classList.add('dark-mode');
+    localStorage.setItem('darkMode', '1');
+  } else {
+    document.body.classList.remove('dark-mode');
+    localStorage.setItem('darkMode', '0');
+  }
+}
+
 // Auto-submit dos filtros
 document.addEventListener('DOMContentLoaded', function() {
   const ordenacaoSelect = document.querySelector('select[name="ordenacao"]');
@@ -134,6 +145,40 @@ document.addEventListener('DOMContentLoaded', function() {
   if (formatoSelect) {
     formatoSelect.addEventListener('change', function() {
       this.form.submit();
+    });
+  }
+
+  // Spinner em botões de submit
+  document.querySelectorAll('form').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+      const btn = form.querySelector('button[type=submit]');
+      if (btn) {
+        btn.disabled = true;
+        const original = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processando...';
+        setTimeout(() => { btn.innerHTML = original; btn.disabled = false; }, 10000); // fallback
+      }
+    });
+  });
+
+  // Esconder mensagens flash após 4s
+  setTimeout(function() {
+    document.querySelectorAll('.alert').forEach(function(el) {
+      el.classList.add('fade');
+      setTimeout(() => el.style.display = 'none', 500);
+    });
+  }, 4000);
+
+  // Dark mode: aplicar preferência
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const saved = localStorage.getItem('darkMode');
+  setDarkMode(saved === '1' || (saved === null && prefersDark));
+
+  // Toggle dark mode
+  const btn = document.getElementById('toggle-darkmode');
+  if (btn) {
+    btn.addEventListener('click', function() {
+      setDarkMode(!document.body.classList.contains('dark-mode'));
     });
   }
 }); 
