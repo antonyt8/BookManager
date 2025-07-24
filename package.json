@@ -8,7 +8,9 @@
     "test": "jest --runInBand",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "build": "echo 'Build completed'"
+    "build": "echo 'Build completed'",
+    "icons": "node generate-icons.js",
+    "pwa:check": "npx pwa-asset-generator"
   },
   "jest": {
     "testEnvironment": "node"
