@@ -24,11 +24,11 @@ RUN apt-get update -qq && \
 COPY package-lock.json package.json ./
 RUN npm ci --include=dev
 
-# Copy application code
+# Copiar código
 COPY . .
 
-# Generate PWA icons if in PWA branch
-RUN if [ -f "generate-icons.js" ]; then npm run icons; fi
+# Pular geração de ícones - resolver depois
+# RUN if [ -f "generate-icons.js" ]; then npm run icons; fi
 
 # Build application (placeholder for future build steps)
 RUN npm run build

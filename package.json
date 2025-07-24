@@ -8,7 +8,8 @@
     "test": "jest --runInBand",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "build": "echo 'Build completed'"
+    "build": "echo 'Build completed'",
+    "icons": "node generate-icons.js"
   },
   "jest": {
     "testEnvironment": "node"
