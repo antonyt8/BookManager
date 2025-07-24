@@ -53,18 +53,33 @@ router.get('/confirmar/:token', UserController.confirmarEmail);
 // Google OAuth
 router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
-router.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/usuarios/login', failureFlash: true }),
-  (req, res) => {
-    req.session.user = {
-      id: req.user.id,
-      nome: req.user.nome,
-      email: req.user.email,
-      avatar_url: req.user.avatar_url
-    };
-    req.flash('success', 'Login com Google realizado com sucesso!');
-    res.redirect('/livros');
-  }
+// Callback do Google OAuth
+router.get('/auth/google/callback', 
+    (req, res, next) => {
+        console.log('[DEBUG] Callback recebido, URL:', req.url);
+        console.log('[DEBUG] Query params:', req.query);
+        next();
+    },
+    (req, res, next) => {
+        passport.authenticate('google', { failureRedirect: '/usuarios/login' })(req, res, (err) => {
+            if (err) {
+                console.error('[ERROR] Erro na autenticação:', err);
+                return res.redirect('/usuarios/login');
+            }
+            console.log('[DEBUG] Autenticação bem-sucedida, usuário:', req.user);
+            next();
+        });
+    },
+    async (req, res) => {
+        console.log('[DEBUG] Callback bem-sucedido, usuário:', req.user);
+        try {
+            // Redirecionar para dashboard
+            res.redirect('/');
+        } catch (error) {
+            console.error('[ERROR] Erro no callback:', error);
+            res.redirect('/usuarios/login');
+        }
+    }
 );
 
 router.get('/logout', (req, res) => {
