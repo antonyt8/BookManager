@@ -27,7 +27,10 @@ RUN npm ci --include=dev
 # Copy application code
 COPY . .
 
-# Build application
+# Generate PWA icons if in PWA branch
+RUN if [ -f "generate-icons.js" ]; then npm run icons; fi
+
+# Build application (placeholder for future build steps)
 RUN npm run build
 
 # Remove development dependencies
